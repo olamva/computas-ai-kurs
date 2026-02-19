@@ -16,6 +16,9 @@ import {
 } from 'babylonjs'
 import { useGameStore } from '../state/store'
 import { beer, words } from '../data/words'
+import beerAudio from '../assets/audio/Beer.m4a'
+import oinkBeerAudio from '../assets/audio/Oink_beer.m4a'
+import olaBeerAudio from '../assets/audio/Ola_beer.m4a'
 import { AnimalEntity, WordEntry } from '../types'
 
 interface Crop {
@@ -142,12 +145,13 @@ export default function BabylonFarm() {
       id: 'cow',
       name: 'Cow',
       words: [beer],
+      soundUrl: beerAudio,
       cooldownSec: 6,
     }
-    const pigEntity: AnimalEntity = { id: 'pig', name: 'Pig' }
-    const sheepEntity: AnimalEntity = { id: 'sheep', name: 'Sheep' }
+    const pigEntity: AnimalEntity = { id: 'pig', name: 'Pig', soundUrl: olaBeerAudio }
+    const sheepEntity: AnimalEntity = { id: 'sheep', name: 'Sheep', soundUrl: beerAudio }
     const horseEntity: AnimalEntity = { id: 'horse', name: 'Horse' }
-    const chickenEntity: AnimalEntity = { id: 'chicken', name: 'Chicken' }
+    const chickenEntity: AnimalEntity = { id: 'chicken', name: 'Chicken', soundUrl: oinkBeerAudio }
 
     const drawSpeechBubble = (texture: DynamicTexture, text: string) => {
       const ctx = texture.getContext()
@@ -370,7 +374,7 @@ export default function BabylonFarm() {
 
     const triggerAnimal = (instance: AnimalInstance) => {
       const word = pickWord()
-      const audioUrl = word?.audioUrl ?? instance.entity.soundUrl
+      const audioUrl = instance.entity.soundUrl ?? word?.audioUrl
 
       const now = Date.now()
       const cooldownMs = (word?.cooldownSec ?? instance.entity.cooldownSec ?? 4) * 1000
