@@ -15,9 +15,16 @@ import {
 } from 'babylonjs'
 import { useGameStore } from '../state/store'
 import { beer } from '../data/words'
+import { AnimalEntity, WordEntry } from '../types'
 
 interface Crop {
   id: string
+  position: Vector3
+}
+
+interface AnimalInstance {
+  id: string
+  entity: AnimalEntity
   position: Vector3
 }
 
@@ -121,8 +128,21 @@ export default function BabylonFarm() {
     barnRoof.material = roofMat
 
     const cropPositions: Crop[] = []
+    const animalInstances: AnimalInstance[] = []
+    const animalCooldowns = new Map<string, number>()
 
-    const createCow = (name: string, position: Vector3) => {
+    const cowEntity: AnimalEntity = {
+      id: 'cow',
+      name: 'Cow',
+      words: [beer],
+      cooldownSec: 6,
+    }
+    const pigEntity: AnimalEntity = { id: 'pig', name: 'Pig' }
+    const sheepEntity: AnimalEntity = { id: 'sheep', name: 'Sheep' }
+    const horseEntity: AnimalEntity = { id: 'horse', name: 'Horse' }
+    const chickenEntity: AnimalEntity = { id: 'chicken', name: 'Chicken' }
+
+    const createCow = (entity: AnimalEntity, name: string, position: Vector3): AnimalInstance => {
       const root = new TransformNode(`${name}-root`, scene)
       root.position = position
       const body = MeshBuilder.CreateBox(`${name}-body`, { width: 2.4, height: 1.1, depth: 1.2 }, scene)
@@ -145,10 +165,10 @@ export default function BabylonFarm() {
           leg.parent = root
         })
       })
-      return root
+      return { id: name, entity, position: root.position }
     }
 
-    const createPig = (name: string, position: Vector3) => {
+    const createPig = (entity: AnimalEntity, name: string, position: Vector3): AnimalInstance => {
       const root = new TransformNode(`${name}-root`, scene)
       root.position = position
       const body = MeshBuilder.CreateBox(`${name}-body`, { width: 1.8, height: 0.9, depth: 1.1 }, scene)
@@ -172,10 +192,10 @@ export default function BabylonFarm() {
           leg.parent = root
         })
       })
-      return root
+      return { id: name, entity, position: root.position }
     }
 
-    const createSheep = (name: string, position: Vector3) => {
+    const createSheep = (entity: AnimalEntity, name: string, position: Vector3): AnimalInstance => {
       const root = new TransformNode(`${name}-root`, scene)
       root.position = position
       const body = MeshBuilder.CreateSphere(`${name}-body`, { diameter: 1.6 }, scene)
@@ -194,10 +214,10 @@ export default function BabylonFarm() {
           leg.parent = root
         })
       })
-      return root
+      return { id: name, entity, position: root.position }
     }
 
-    const createHorse = (name: string, position: Vector3) => {
+    const createHorse = (entity: AnimalEntity, name: string, position: Vector3): AnimalInstance => {
       const root = new TransformNode(`${name}-root`, scene)
       root.position = position
       const body = MeshBuilder.CreateBox(`${name}-body`, { width: 2.8, height: 1.2, depth: 1 }, scene)
@@ -221,10 +241,10 @@ export default function BabylonFarm() {
           leg.parent = root
         })
       })
-      return root
+      return { id: name, entity, position: root.position }
     }
 
-    const createChicken = (name: string, position: Vector3) => {
+    const createChicken = (entity: AnimalEntity, name: string, position: Vector3): AnimalInstance => {
       const root = new TransformNode(`${name}-root`, scene)
       root.position = position
       const body = MeshBuilder.CreateSphere(`${name}-body`, { diameter: 0.8 }, scene)
@@ -240,18 +260,20 @@ export default function BabylonFarm() {
       beak.position = new Vector3(0.7, 0.92, 0)
       beak.material = makeMat(`${name}-beak-mat`, '#d18a3b')
       beak.parent = root
-      return root
+      return { id: name, entity, position: root.position }
     }
 
-    createCow('cow-1', new Vector3(-6, 0, 2))
-    createCow('cow-2', new Vector3(-8, 0, 5))
-    createPig('pig-1', new Vector3(-3, 0, 3))
-    createSheep('sheep-1', new Vector3(-5, 0, 6))
-    createHorse('horse-1', new Vector3(1, 0, 6))
-    createHorse('horse-2', new Vector3(2, 0, 3))
-    createChicken('chicken-1', new Vector3(-1, 0, 1))
-    createChicken('chicken-2', new Vector3(0.6, 0, 0.8))
-    createChicken('chicken-3', new Vector3(-0.6, 0, 0.9))
+    animalInstances.push(
+      createCow(cowEntity, 'cow-1', new Vector3(-6, 0, 2)),
+      createCow(cowEntity, 'cow-2', new Vector3(-8, 0, 5)),
+      createPig(pigEntity, 'pig-1', new Vector3(-3, 0, 3)),
+      createSheep(sheepEntity, 'sheep-1', new Vector3(-5, 0, 6)),
+      createHorse(horseEntity, 'horse-1', new Vector3(1, 0, 6)),
+      createHorse(horseEntity, 'horse-2', new Vector3(2, 0, 3)),
+      createChicken(chickenEntity, 'chicken-1', new Vector3(-1, 0, 1)),
+      createChicken(chickenEntity, 'chicken-2', new Vector3(0.6, 0, 0.8)),
+      createChicken(chickenEntity, 'chicken-3', new Vector3(-0.6, 0, 0.9))
+    )
 
     const pressed = new Set<string>()
     const store = useGameStore.getState()
@@ -271,6 +293,35 @@ export default function BabylonFarm() {
     window.addEventListener('keyup', handleKey)
 
     const tmp = { mode: 'explore', score: 0 }
+
+    const pickWord = (entity: AnimalEntity): WordEntry | undefined => {
+      if (!entity.words || entity.words.length === 0) return undefined
+      const idx = Math.floor(Math.random() * entity.words.length)
+      return entity.words[idx]
+    }
+
+    const canSpeak = (entity: AnimalEntity) =>
+      Boolean(entity.soundUrl || (entity.words && entity.words.length > 0))
+
+    const triggerAnimal = (instance: AnimalInstance) => {
+      const word = pickWord(instance.entity)
+      const audioUrl = word?.audioUrl ?? instance.entity.soundUrl
+      if (!audioUrl) return
+
+      const now = Date.now()
+      const cooldownMs = (word?.cooldownSec ?? instance.entity.cooldownSec ?? 4) * 1000
+      const last = animalCooldowns.get(instance.id) ?? 0
+      if (now - last < cooldownMs) return
+      animalCooldowns.set(instance.id, now)
+
+      if (word) {
+        useGameStore.getState().selectWord(word.id)
+      }
+
+      const audio = new Audio(audioUrl)
+      audio.volume = useGameStore.getState().player.settings.volume
+      audio.play().catch(() => {})
+    }
 
     const update = (delta: number) => {
       const dir = new Vector3(0, 0, 0)
@@ -293,6 +344,19 @@ export default function BabylonFarm() {
       // cheap gravity jiggle
       camera.position.y = 1.8 + Math.sin(engine.getDeltaTime() * 0.002) * 0.05
 
+      // Animal proximity check
+      const nearestAnimal = animalInstances
+        .filter((animal) => canSpeak(animal.entity))
+        .map((animal) => ({
+          animal,
+          dist: Vector3.Distance(camera.position, animal.position),
+        }))
+        .sort((a, b) => a.dist - b.dist)[0]
+
+      if (nearestAnimal && nearestAnimal.dist < 2.2) {
+        triggerAnimal(nearestAnimal.animal)
+      }
+
       // Interaction check
       if (pressed.has('e')) {
         const nearest = cropPositions
@@ -304,7 +368,7 @@ export default function BabylonFarm() {
 
         if (nearest && nearest.dist < 2.2) {
           tmp.mode = 'encounter'
-          store.selectBeer()
+          store.selectWord(beer.id)
           store.recordResult({
             wordId: beer.id,
             type: 'typing',

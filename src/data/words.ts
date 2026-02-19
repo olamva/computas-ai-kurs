@@ -1,10 +1,11 @@
 import { WordEntry } from '../types'
+import beerAudio from '../assets/audio/Beer.m4a'
 
 export const beer: WordEntry = {
   id: 'beer',
   word: 'beer',
   ipa: '/bɪr/',
-  audioUrl: '/audio/beer.mp3',
+  audioUrl: beerAudio,
   severity: 1,
   meaning: 'An alcoholic drink made from fermented grains, usually barley.',
   politeAlt: 'beverage',

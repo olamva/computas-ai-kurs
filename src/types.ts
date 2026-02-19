@@ -13,6 +13,14 @@ export interface WordEntry {
   cooldownSec: number
 }
 
+export interface AnimalEntity {
+  id: string
+  name: string
+  words?: WordEntry[]
+  soundUrl?: string
+  cooldownSec?: number
+}
+
 export interface ChallengeResult {
   wordId: string
   type: ChallengeType
