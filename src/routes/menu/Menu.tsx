@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import MenuThree from './MenuThree'
 import './menu.css'
 
 export default function Menu() {
@@ -10,6 +11,7 @@ export default function Menu() {
   return (
     <main className="menu-screen">
       <div className="menu-scene" aria-hidden="true">
+        <MenuThree />
         <div className="menu-sun" />
         <div className="menu-cloud cloud-1" />
         <div className="menu-cloud cloud-2" />
@@ -30,6 +32,7 @@ export default function Menu() {
       </div>
 
       <div className="menu-cta">
+        <h1 className="menu-title">English Explorers for Norwegian Kids</h1>
         <Link className="menu-button" to="/farm">
           Go learn yey
         </Link>
