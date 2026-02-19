@@ -1,22 +1,20 @@
 import { create } from 'zustand'
-import { ChallengeResult, PlayerState, WordEntry } from '../types'
-import { words as wordList } from '../data/words'
+import { ChallengeResult, PlayerState } from '../types'
+import { beer } from '../data/words'
 
 interface GameStore {
-  words: WordEntry[]
   player: PlayerState
-  currentWordId: string | null
+  currentWordId: string
   results: ChallengeResult[]
   lastEncounterAt?: number
   setMotionReduced: (value: boolean) => void
   setSeizureSafe: (value: boolean) => void
-  nextWord: (id: string) => void
+  selectBeer: () => void
   recordResult: (result: ChallengeResult) => void
   unlockTier: () => void
 }
 
-export const useGameStore = create<GameStore>((set, get) => ({
-  words: wordList,
+export const useGameStore = create<GameStore>((set) => ({
   player: {
     inventory: [],
     tier: 1,
@@ -28,7 +26,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       volume: 0.8,
     },
   },
-  currentWordId: null,
+  currentWordId: beer.id,
   results: [],
   setMotionReduced: (value) =>
     set((state) => ({
@@ -38,7 +36,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set((state) => ({
       player: { ...state.player, settings: { ...state.player.settings, seizureSafe: value } },
     })),
-  nextWord: (id) => set({ currentWordId: id, lastEncounterAt: Date.now() }),
+  selectBeer: () => set({ currentWordId: beer.id, lastEncounterAt: Date.now() }),
   recordResult: (result) =>
     set((state) => ({ results: [...state.results, result], player: { ...state.player, streak: state.player.streak + 1 } })),
   unlockTier: () =>

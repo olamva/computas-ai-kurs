@@ -1,12 +1,11 @@
 import { useEffect, useRef } from 'react'
 import { Engine, HemisphericLight, MeshBuilder, Scene, StandardMaterial, Color3, Vector3, GlowLayer, UniversalCamera } from 'babylonjs'
 import { useGameStore } from '../state/store'
-import { words } from '../data/words'
+import { beer } from '../data/words'
 
 interface Crop {
   id: string
   position: Vector3
-  severity: number
 }
 
 export default function BabylonFarm() {
@@ -47,17 +46,18 @@ export default function BabylonFarm() {
     barn.material = barnMat
     glow.addIncludedOnlyMesh(barn)
 
-    const cropPositions: Crop[] = words.map((w, idx) => ({
-      id: w.id,
-      position: new Vector3(Math.sin(idx * 1.3) * 10, 0.6, Math.cos(idx * 1.3) * 10),
-      severity: w.severity,
-    }))
+    const cropPositions: Crop[] = [
+      {
+        id: beer.id,
+        position: new Vector3(0, 0.6, 8),
+      },
+    ]
 
     cropPositions.forEach((crop) => {
       const stalk = MeshBuilder.CreateCylinder(`crop-${crop.id}`, { height: 1.2, diameter: 0.35 }, scene)
       stalk.position = crop.position
       const mat = new StandardMaterial(`mat-${crop.id}`, scene)
-      mat.diffuseColor = Color3.FromHexString(crop.severity === 3 ? '#ff5f6f' : crop.severity === 2 ? '#9bff4f' : '#7af9f0')
+      mat.diffuseColor = Color3.FromHexString('#f4c542')
       mat.emissiveColor = mat.diffuseColor.scale(0.8)
       stalk.material = mat
       glow.addIncludedOnlyMesh(stalk)
@@ -65,6 +65,15 @@ export default function BabylonFarm() {
 
     const pressed = new Set<string>()
     const store = useGameStore.getState()
+    const beerAudio = new Audio(beer.audioUrl)
+    beerAudio.preload = 'auto'
+
+    const playBeerAudio = () => {
+      const volume = useGameStore.getState().player.settings.volume
+      beerAudio.volume = Math.max(0, Math.min(1, volume))
+      beerAudio.currentTime = 0
+      beerAudio.play().catch(() => {})
+    }
 
     const handleKey = (ev: KeyboardEvent) => {
       if (ev.type === 'keydown') pressed.add(ev.key.toLowerCase())
@@ -105,14 +114,15 @@ export default function BabylonFarm() {
 
         if (nearest && nearest.dist < 2.2) {
           tmp.mode = 'encounter'
-          store.nextWord(nearest.crop.id)
+          store.selectBeer()
           store.recordResult({
-            wordId: nearest.crop.id,
+            wordId: beer.id,
             type: 'typing',
             score: Math.max(10, 50 - Math.round(nearest.dist * 10)),
             accuracy: 0.92,
             completedAt: new Date().toISOString(),
           })
+          playBeerAudio()
           tmp.score += 10
         }
       } else {
@@ -148,6 +158,8 @@ export default function BabylonFarm() {
     return () => {
       window.removeEventListener('keydown', handleKey)
       window.removeEventListener('keyup', handleKey)
+      beerAudio.pause()
+      beerAudio.currentTime = 0
       engine.stopRenderLoop()
       engine.dispose()
     }

@@ -1,24 +1,13 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import BabylonFarm from '../game/BabylonFarm'
 import { useGameStore } from '../state/store'
-import { words } from '../data/words'
+import { beer } from '../data/words'
 
 export default function Farm() {
   const { player, setMotionReduced, setSeizureSafe } = useGameStore()
-  const [overlayWord, setOverlayWord] = useState(words[0])
 
   useEffect(() => {
-    document.title = 'Profane Farm — Game'
-  }, [])
-
-  useEffect(() => {
-    const handle = setInterval(() => {
-      setOverlayWord((prev) => {
-        const idx = words.findIndex((w) => w.id === prev.id)
-        return words[(idx + 1) % words.length]
-      })
-    }, 6000)
-    return () => clearInterval(handle)
+    document.title = 'Beer Farm — Game'
   }, [])
 
   useEffect(() => {
@@ -47,7 +36,7 @@ export default function Farm() {
     <div className="min-h-screen bg-background text-foreground relative">
       <div className="absolute inset-x-0 top-0 z-30 flex items-center justify-between px-4 py-3 bg-gradient-to-b from-black/70 to-transparent">
         <div>
-          <p className="pill mb-1">Grotesque learning</p>
+          <p className="pill mb-1">Beer learning</p>
           <h2 className="text-2xl font-bold">Farm walk — Tier {player.tier}</h2>
         </div>
         <div className="flex items-center gap-3">
@@ -70,10 +59,10 @@ export default function Farm() {
       <aside className="absolute right-4 top-24 max-w-sm z-30 space-y-3">
         <div className="card-brutal glass border-glow">
           <p className="text-sm uppercase tracking-wide text-muted-foreground">Word spotlight</p>
-          <h3 className="text-3xl font-black text-neon">{overlayWord.word}</h3>
-          <p className="text-muted-foreground text-sm">{overlayWord.meaning}</p>
+          <h3 className="text-3xl font-black text-neon">{beer.word}</h3>
+          <p className="text-muted-foreground text-sm">{beer.meaning}</p>
           <div className="flex flex-wrap gap-2 mt-3">
-            {overlayWord.contexts.map((ctx) => (
+            {beer.contexts.map((ctx) => (
               <span key={ctx} className="pill">{ctx}</span>
             ))}
           </div>
@@ -82,7 +71,7 @@ export default function Farm() {
           <p className="font-semibold text-foreground">Controls</p>
           <ul className="list-disc list-inside space-y-1">
             <li>WASD: walk the farm</li>
-            <li>E: interact with curse crop</li>
+            <li>E: interact with beer crop</li>
             <li>Space: jump pulse</li>
             <li>F: toggle fullscreen</li>
           </ul>
