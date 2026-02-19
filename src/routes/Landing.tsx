@@ -1,3 +1,4 @@
+<<<<<<< ours
 import { Link } from 'react-router-dom'
 import HeroCanvas from '../three/HeroCanvas'
 import { useEffect } from 'react'
@@ -57,4 +58,10 @@ export default function Landing() {
       </section>
     </main>
   )
+=======
+import Menu from '../screens/menu/Menu'
+
+export default function Landing() {
+  return <Menu />
+>>>>>>> theirs
 }
