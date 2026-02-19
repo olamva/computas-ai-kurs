@@ -12,9 +12,10 @@ import {
   UniversalCamera,
   DirectionalLight,
   TransformNode,
+  DynamicTexture,
 } from 'babylonjs'
 import { useGameStore } from '../state/store'
-import { beer } from '../data/words'
+import { beer, words } from '../data/words'
 import { AnimalEntity, WordEntry } from '../types'
 
 interface Crop {
@@ -26,6 +27,12 @@ interface AnimalInstance {
   id: string
   entity: AnimalEntity
   position: Vector3
+  root: TransformNode
+  speech: {
+    mesh: Mesh
+    texture: DynamicTexture
+    hideAt: number
+  }
 }
 
 export default function BabylonFarm() {
@@ -142,6 +149,64 @@ export default function BabylonFarm() {
     const horseEntity: AnimalEntity = { id: 'horse', name: 'Horse' }
     const chickenEntity: AnimalEntity = { id: 'chicken', name: 'Chicken' }
 
+    const drawSpeechBubble = (texture: DynamicTexture, text: string) => {
+      const ctx = texture.getContext()
+      const size = texture.getSize()
+      const width = size.width
+      const height = size.height
+      ctx.clearRect(0, 0, width, height)
+
+      const radius = 36
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.72)'
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)'
+      ctx.lineWidth = 6
+      ctx.beginPath()
+      ctx.moveTo(radius, 24)
+      ctx.lineTo(width - radius, 24)
+      ctx.quadraticCurveTo(width - 24, 24, width - 24, radius)
+      ctx.lineTo(width - 24, height - radius)
+      ctx.quadraticCurveTo(width - 24, height - 24, width - radius, height - 24)
+      ctx.lineTo(radius, height - 24)
+      ctx.quadraticCurveTo(24, height - 24, 24, height - radius)
+      ctx.lineTo(24, radius)
+      ctx.quadraticCurveTo(24, 24, radius, 24)
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke()
+
+      const maxWidth = width - 80
+      let fontSize = 72
+      ctx.font = `800 ${fontSize}px "Trebuchet MS", Arial, sans-serif`
+      while (ctx.measureText(text).width > maxWidth && fontSize > 32) {
+        fontSize -= 4
+        ctx.font = `800 ${fontSize}px "Trebuchet MS", Arial, sans-serif`
+      }
+      ctx.fillStyle = '#fff7e5'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(text, width / 2, height / 2)
+      texture.update()
+    }
+
+    const createSpeechBubble = (root: TransformNode, height: number) => {
+      const texture = new DynamicTexture(`${root.name}-speech-tex`, { width: 512, height: 256 }, scene, false)
+      texture.hasAlpha = true
+      drawSpeechBubble(texture, '...')
+      const mat = new StandardMaterial(`${root.name}-speech-mat`, scene)
+      mat.diffuseTexture = texture
+      mat.opacityTexture = texture
+      mat.emissiveColor = new Color3(1, 1, 1)
+      mat.backFaceCulling = false
+      const plane = MeshBuilder.CreatePlane(`${root.name}-speech`, { width: 2.4, height: 1.1 }, scene)
+      plane.material = mat
+      plane.position = new Vector3(0, height, 0)
+      plane.billboardMode = Mesh.BILLBOARDMODE_ALL
+      plane.isPickable = false
+      plane.parent = root
+      plane.setEnabled(false)
+      return { mesh: plane, texture, hideAt: 0 }
+    }
+
     const createCow = (entity: AnimalEntity, name: string, position: Vector3): AnimalInstance => {
       const root = new TransformNode(`${name}-root`, scene)
       root.position = position
@@ -165,7 +230,7 @@ export default function BabylonFarm() {
           leg.parent = root
         })
       })
-      return { id: name, entity, position: root.position }
+      return { id: name, entity, position: root.position, root, speech: createSpeechBubble(root, 2.6) }
     }
 
     const createPig = (entity: AnimalEntity, name: string, position: Vector3): AnimalInstance => {
@@ -192,7 +257,7 @@ export default function BabylonFarm() {
           leg.parent = root
         })
       })
-      return { id: name, entity, position: root.position }
+      return { id: name, entity, position: root.position, root, speech: createSpeechBubble(root, 2.2) }
     }
 
     const createSheep = (entity: AnimalEntity, name: string, position: Vector3): AnimalInstance => {
@@ -214,7 +279,7 @@ export default function BabylonFarm() {
           leg.parent = root
         })
       })
-      return { id: name, entity, position: root.position }
+      return { id: name, entity, position: root.position, root, speech: createSpeechBubble(root, 2.3) }
     }
 
     const createHorse = (entity: AnimalEntity, name: string, position: Vector3): AnimalInstance => {
@@ -241,7 +306,7 @@ export default function BabylonFarm() {
           leg.parent = root
         })
       })
-      return { id: name, entity, position: root.position }
+      return { id: name, entity, position: root.position, root, speech: createSpeechBubble(root, 2.8) }
     }
 
     const createChicken = (entity: AnimalEntity, name: string, position: Vector3): AnimalInstance => {
@@ -260,19 +325,19 @@ export default function BabylonFarm() {
       beak.position = new Vector3(0.7, 0.92, 0)
       beak.material = makeMat(`${name}-beak-mat`, '#d18a3b')
       beak.parent = root
-      return { id: name, entity, position: root.position }
+      return { id: name, entity, position: root.position, root, speech: createSpeechBubble(root, 1.7) }
     }
 
     animalInstances.push(
-      createCow(cowEntity, 'cow-1', new Vector3(-6, 0, 2)),
-      createCow(cowEntity, 'cow-2', new Vector3(-8, 0, 5)),
-      createPig(pigEntity, 'pig-1', new Vector3(-3, 0, 3)),
-      createSheep(sheepEntity, 'sheep-1', new Vector3(-5, 0, 6)),
-      createHorse(horseEntity, 'horse-1', new Vector3(1, 0, 6)),
-      createHorse(horseEntity, 'horse-2', new Vector3(2, 0, 3)),
-      createChicken(chickenEntity, 'chicken-1', new Vector3(-1, 0, 1)),
-      createChicken(chickenEntity, 'chicken-2', new Vector3(0.6, 0, 0.8)),
-      createChicken(chickenEntity, 'chicken-3', new Vector3(-0.6, 0, 0.9))
+      createCow(cowEntity, 'cow-1', new Vector3(-11, 0, -4)),
+      createCow(cowEntity, 'cow-2', new Vector3(-9, 0, 8)),
+      createPig(pigEntity, 'pig-1', new Vector3(-3, 0, -7)),
+      createSheep(sheepEntity, 'sheep-1', new Vector3(-6, 0, 11)),
+      createHorse(horseEntity, 'horse-1', new Vector3(4, 0, 9)),
+      createHorse(horseEntity, 'horse-2', new Vector3(9, 0, 1)),
+      createChicken(chickenEntity, 'chicken-1', new Vector3(2, 0, -3)),
+      createChicken(chickenEntity, 'chicken-2', new Vector3(7, 0, -6)),
+      createChicken(chickenEntity, 'chicken-3', new Vector3(-1, 0, 4))
     )
 
     const pressed = new Set<string>()
@@ -294,19 +359,18 @@ export default function BabylonFarm() {
 
     const tmp = { mode: 'explore', score: 0 }
 
-    const pickWord = (entity: AnimalEntity): WordEntry | undefined => {
-      if (!entity.words || entity.words.length === 0) return undefined
-      const idx = Math.floor(Math.random() * entity.words.length)
-      return entity.words[idx]
+    const pickWord = (): WordEntry | undefined => {
+      if (words.length === 0) return undefined
+      const idx = Math.floor(Math.random() * words.length)
+      return words[idx]
     }
 
     const canSpeak = (entity: AnimalEntity) =>
-      Boolean(entity.soundUrl || (entity.words && entity.words.length > 0))
+      Boolean(entity.soundUrl || words.length > 0)
 
     const triggerAnimal = (instance: AnimalInstance) => {
-      const word = pickWord(instance.entity)
+      const word = pickWord()
       const audioUrl = word?.audioUrl ?? instance.entity.soundUrl
-      if (!audioUrl) return
 
       const now = Date.now()
       const cooldownMs = (word?.cooldownSec ?? instance.entity.cooldownSec ?? 4) * 1000
@@ -316,14 +380,20 @@ export default function BabylonFarm() {
 
       if (word) {
         useGameStore.getState().selectWord(word.id)
+        drawSpeechBubble(instance.speech.texture, word.word)
+        instance.speech.hideAt = now + 3000
+        instance.speech.mesh.setEnabled(true)
       }
 
-      const audio = new Audio(audioUrl)
-      audio.volume = useGameStore.getState().player.settings.volume
-      audio.play().catch(() => {})
+      if (audioUrl) {
+        const audio = new Audio(audioUrl)
+        audio.volume = useGameStore.getState().player.settings.volume
+        audio.play().catch(() => {})
+      }
     }
 
     const update = (delta: number) => {
+      const now = Date.now()
       const dir = new Vector3(0, 0, 0)
       if (pressed.has('w')) dir.z += 1
       if (pressed.has('s')) dir.z -= 1
@@ -344,6 +414,12 @@ export default function BabylonFarm() {
       // cheap gravity jiggle
       camera.position.y = 1.8 + Math.sin(engine.getDeltaTime() * 0.002) * 0.05
 
+      animalInstances.forEach((animal) => {
+        if (animal.speech.mesh.isEnabled() && now > animal.speech.hideAt) {
+          animal.speech.mesh.setEnabled(false)
+        }
+      })
+
       // Animal proximity check
       const nearestAnimal = animalInstances
         .filter((animal) => canSpeak(animal.entity))
@@ -353,7 +429,7 @@ export default function BabylonFarm() {
         }))
         .sort((a, b) => a.dist - b.dist)[0]
 
-      if (nearestAnimal && nearestAnimal.dist < 2.2) {
+      if (nearestAnimal && nearestAnimal.dist < 3.8) {
         triggerAnimal(nearestAnimal.animal)
       }
 
