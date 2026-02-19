@@ -1,5 +1,7 @@
-import { useEffect, useRef } from 'react'
 import {
+  Color3,
+  DirectionalLight,
+  DynamicTexture,
   Engine,
   HemisphericLight,
   Mesh,
@@ -7,19 +9,17 @@ import {
   PhotoDome,
   Scene,
   StandardMaterial,
-  Color3,
-  Vector3,
-  UniversalCamera,
-  DirectionalLight,
   TransformNode,
-  DynamicTexture,
-} from 'babylonjs'
-import { useGameStore } from '../state/store'
-import { beer, words } from '../data/words'
-import beerAudio from '../assets/audio/Beer.m4a'
-import oinkBeerAudio from '../assets/audio/Oink_beer.m4a'
-import olaBeerAudio from '../assets/audio/Ola_beer.m4a'
-import { AnimalEntity, WordEntry } from '../types'
+  UniversalCamera,
+  Vector3,
+} from "babylonjs"
+import { useEffect, useRef } from "react"
+import beerAudio from "../assets/audio/Beer.m4a"
+import oinkBeerAudio from "../assets/audio/Oink_beer.m4a"
+import olaBeerAudio from "../assets/audio/Ola_beer.m4a"
+import { beer, words } from "../data/words"
+import { useGameStore } from "../state/store"
+import { AnimalEntity, WordEntry } from "../types"
 
 interface Crop {
   id: string
@@ -47,38 +47,38 @@ export default function BabylonFarm() {
 
     const engine = new Engine(canvas, true, { stencil: true, preserveDrawingBuffer: true })
     const scene = new Scene(engine)
-    scene.clearColor = Color3.FromHexString('#8fb7d3').toColor4(1)
+    scene.clearColor = Color3.FromHexString("#8fb7d3").toColor4(1)
 
-    const camera = new UniversalCamera('camera', new Vector3(0, 2, -8), scene)
+    const camera = new UniversalCamera("camera", new Vector3(0, 2, -8), scene)
     camera.attachControl(canvas, true)
     camera.speed = 0.12
     camera.inertia = 0.6
 
     scene.ambientColor = new Color3(0.3, 0.34, 0.36)
 
-    const hemi = new HemisphericLight('hemi', new Vector3(0, 1, 0), scene)
+    const hemi = new HemisphericLight("hemi", new Vector3(0, 1, 0), scene)
     hemi.intensity = 1.2
     hemi.diffuse = new Color3(0.75, 0.8, 0.78)
     hemi.groundColor = new Color3(0.22, 0.26, 0.2)
 
     const sunDir = new Vector3(-0.2, -1, 0.15).normalize()
-    const sun = new DirectionalLight('sun', sunDir, scene)
+    const sun = new DirectionalLight("sun", sunDir, scene)
     sun.intensity = 1.05
     sun.diffuse = new Color3(1, 0.97, 0.9)
 
     const skyDome = new PhotoDome(
-      'skyDome',
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Autumn_field_puresky_-_Panorama_%28Sergej_Majboroda_and_Jarod_Guest_via_Poly_Haven%29.jpg/2560px-Autumn_field_puresky_-_Panorama_%28Sergej_Majboroda_and_Jarod_Guest_via_Poly_Haven%29.jpg',
+      "skyDome",
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Autumn_field_puresky_-_Panorama_%28Sergej_Majboroda_and_Jarod_Guest_via_Poly_Haven%29.jpg/2560px-Autumn_field_puresky_-_Panorama_%28Sergej_Majboroda_and_Jarod_Guest_via_Poly_Haven%29.jpg",
       { size: 220 },
-      scene
+      scene,
     )
     skyDome.fovMultiplier = 1.0
 
-    const sunMesh = MeshBuilder.CreateDisc('sunMesh', { radius: 8, tessellation: 48 }, scene)
+    const sunMesh = MeshBuilder.CreateDisc("sunMesh", { radius: 8, tessellation: 48 }, scene)
     sunMesh.position = sunDir.scale(-120)
     sunMesh.billboardMode = Mesh.BILLBOARDMODE_ALL
     sunMesh.isPickable = false
-    const sunMat = new StandardMaterial('sunMat', scene)
+    const sunMat = new StandardMaterial("sunMat", scene)
     sunMat.emissiveColor = new Color3(1, 0.95, 0.75)
     sunMat.diffuseColor = new Color3(1, 0.95, 0.75)
     sunMat.alpha = 0.8
@@ -91,15 +91,15 @@ export default function BabylonFarm() {
       return mat
     }
 
-    const ground = MeshBuilder.CreateGround('ground', { width: 50, height: 50, subdivisions: 10 }, scene)
-    const groundMat = new StandardMaterial('groundMat', scene)
+    const ground = MeshBuilder.CreateGround("ground", { width: 50, height: 50, subdivisions: 10 }, scene)
+    const groundMat = new StandardMaterial("groundMat", scene)
     groundMat.diffuseColor = new Color3(0.28, 0.42, 0.24)
     groundMat.specularColor = new Color3(0, 0, 0)
     ground.material = groundMat
 
-    const barnMat = new StandardMaterial('barnMat', scene)
+    const barnMat = new StandardMaterial("barnMat", scene)
     barnMat.diffuseColor = new Color3(0.55, 0.2, 0.18)
-    const roofMat = new StandardMaterial('barnRoofMat', scene)
+    const roofMat = new StandardMaterial("barnRoofMat", scene)
     roofMat.diffuseColor = new Color3(0.25, 0.15, 0.12)
 
     const barnCenter = new Vector3(6, 0, 8)
@@ -108,31 +108,67 @@ export default function BabylonFarm() {
     const barnDepth = 8
     const wallThickness = 0.3
 
-    const barnFloor = MeshBuilder.CreateBox('barnFloor', { width: barnWidth - wallThickness, height: 0.2, depth: barnDepth - wallThickness }, scene)
+    const barnFloor = MeshBuilder.CreateBox(
+      "barnFloor",
+      { width: barnWidth - wallThickness, height: 0.2, depth: barnDepth - wallThickness },
+      scene,
+    )
     barnFloor.position = new Vector3(barnCenter.x, 0.1, barnCenter.z)
-    barnFloor.material = makeMat('barnFloorMat', '#3a2a1f')
+    barnFloor.material = makeMat("barnFloorMat", "#3a2a1f")
 
-    const backWall = MeshBuilder.CreateBox('barnBack', { width: barnWidth, height: barnHeight, depth: wallThickness }, scene)
+    const backWall = MeshBuilder.CreateBox(
+      "barnBack",
+      { width: barnWidth, height: barnHeight, depth: wallThickness },
+      scene,
+    )
     backWall.position = new Vector3(barnCenter.x, barnHeight / 2, barnCenter.z + barnDepth / 2)
     backWall.material = barnMat
 
-    const leftWall = MeshBuilder.CreateBox('barnLeft', { width: wallThickness, height: barnHeight, depth: barnDepth }, scene)
+    const leftWall = MeshBuilder.CreateBox(
+      "barnLeft",
+      { width: wallThickness, height: barnHeight, depth: barnDepth },
+      scene,
+    )
     leftWall.position = new Vector3(barnCenter.x - barnWidth / 2, barnHeight / 2, barnCenter.z)
     leftWall.material = barnMat
 
-    const rightWall = MeshBuilder.CreateBox('barnRight', { width: wallThickness, height: barnHeight, depth: barnDepth }, scene)
+    const rightWall = MeshBuilder.CreateBox(
+      "barnRight",
+      { width: wallThickness, height: barnHeight, depth: barnDepth },
+      scene,
+    )
     rightWall.position = new Vector3(barnCenter.x + barnWidth / 2, barnHeight / 2, barnCenter.z)
     rightWall.material = barnMat
 
-    const frontWallLeft = MeshBuilder.CreateBox('barnFrontLeft', { width: (barnWidth / 2) - 1.2, height: barnHeight, depth: wallThickness }, scene)
-    frontWallLeft.position = new Vector3(barnCenter.x - (barnWidth / 4) - 0.6, barnHeight / 2, barnCenter.z - barnDepth / 2)
+    const frontWallLeft = MeshBuilder.CreateBox(
+      "barnFrontLeft",
+      { width: barnWidth / 2 - 1.2, height: barnHeight, depth: wallThickness },
+      scene,
+    )
+    frontWallLeft.position = new Vector3(
+      barnCenter.x - barnWidth / 4 - 0.6,
+      barnHeight / 2,
+      barnCenter.z - barnDepth / 2,
+    )
     frontWallLeft.material = barnMat
 
-    const frontWallRight = MeshBuilder.CreateBox('barnFrontRight', { width: (barnWidth / 2) - 1.2, height: barnHeight, depth: wallThickness }, scene)
-    frontWallRight.position = new Vector3(barnCenter.x + (barnWidth / 4) + 0.6, barnHeight / 2, barnCenter.z - barnDepth / 2)
+    const frontWallRight = MeshBuilder.CreateBox(
+      "barnFrontRight",
+      { width: barnWidth / 2 - 1.2, height: barnHeight, depth: wallThickness },
+      scene,
+    )
+    frontWallRight.position = new Vector3(
+      barnCenter.x + barnWidth / 4 + 0.6,
+      barnHeight / 2,
+      barnCenter.z - barnDepth / 2,
+    )
     frontWallRight.material = barnMat
 
-    const barnRoof = MeshBuilder.CreateBox('barnRoof', { width: barnWidth + 1, height: 1.6, depth: barnDepth + 1 }, scene)
+    const barnRoof = MeshBuilder.CreateBox(
+      "barnRoof",
+      { width: barnWidth + 1, height: 1.6, depth: barnDepth + 1 },
+      scene,
+    )
     barnRoof.position = new Vector3(barnCenter.x, barnHeight + 0.6, barnCenter.z)
     barnRoof.rotation.z = Math.PI / 12
     barnRoof.material = roofMat
@@ -142,16 +178,16 @@ export default function BabylonFarm() {
     const animalCooldowns = new Map<string, number>()
 
     const cowEntity: AnimalEntity = {
-      id: 'cow',
-      name: 'Cow',
+      id: "cow",
+      name: "Cow",
       words: [beer],
       soundUrl: beerAudio,
       cooldownSec: 6,
     }
-    const pigEntity: AnimalEntity = { id: 'pig', name: 'Pig', soundUrl: olaBeerAudio }
-    const sheepEntity: AnimalEntity = { id: 'sheep', name: 'Sheep', soundUrl: beerAudio }
-    const horseEntity: AnimalEntity = { id: 'horse', name: 'Horse' }
-    const chickenEntity: AnimalEntity = { id: 'chicken', name: 'Chicken', soundUrl: oinkBeerAudio }
+    const pigEntity: AnimalEntity = { id: "pig", name: "Pig", soundUrl: olaBeerAudio }
+    const sheepEntity: AnimalEntity = { id: "sheep", name: "Sheep", soundUrl: beerAudio }
+    const horseEntity: AnimalEntity = { id: "horse", name: "Horse", soundUrl: oinkBeerAudio }
+    const chickenEntity: AnimalEntity = { id: "chicken", name: "Chicken", soundUrl: oinkBeerAudio }
 
     const drawSpeechBubble = (texture: DynamicTexture, text: string) => {
       const ctx = texture.getContext()
@@ -161,8 +197,8 @@ export default function BabylonFarm() {
       ctx.clearRect(0, 0, width, height)
 
       const radius = 36
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.72)'
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)'
+      ctx.fillStyle = "rgba(0, 0, 0, 0.72)"
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.85)"
       ctx.lineWidth = 6
       ctx.beginPath()
       ctx.moveTo(radius, 24)
@@ -185,9 +221,9 @@ export default function BabylonFarm() {
         fontSize -= 4
         ctx.font = `800 ${fontSize}px "Trebuchet MS", Arial, sans-serif`
       }
-      ctx.fillStyle = '#fff7e5'
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
+      ctx.fillStyle = "#fff7e5"
+      ctx.textAlign = "center"
+      ctx.textBaseline = "middle"
       ctx.fillText(text, width / 2, height / 2)
       texture.update()
     }
@@ -195,7 +231,7 @@ export default function BabylonFarm() {
     const createSpeechBubble = (root: TransformNode, height: number) => {
       const texture = new DynamicTexture(`${root.name}-speech-tex`, { width: 512, height: 256 }, scene, false)
       texture.hasAlpha = true
-      drawSpeechBubble(texture, '...')
+      drawSpeechBubble(texture, "...")
       const mat = new StandardMaterial(`${root.name}-speech-mat`, scene)
       mat.diffuseTexture = texture
       mat.opacityTexture = texture
@@ -216,21 +252,21 @@ export default function BabylonFarm() {
       root.position = position
       const body = MeshBuilder.CreateBox(`${name}-body`, { width: 2.4, height: 1.1, depth: 1.2 }, scene)
       body.position = new Vector3(0, 1, 0)
-      body.material = makeMat(`${name}-body-mat`, '#d7d1c9')
+      body.material = makeMat(`${name}-body-mat`, "#d7d1c9")
       body.parent = root
       const head = MeshBuilder.CreateBox(`${name}-head`, { width: 0.8, height: 0.6, depth: 0.7 }, scene)
       head.position = new Vector3(1.6, 1.2, 0)
-      head.material = makeMat(`${name}-head-mat`, '#c5bfb7')
+      head.material = makeMat(`${name}-head-mat`, "#c5bfb7")
       head.parent = root
       const snout = MeshBuilder.CreateBox(`${name}-snout`, { width: 0.3, height: 0.3, depth: 0.5 }, scene)
       snout.position = new Vector3(2.1, 1.05, 0)
-      snout.material = makeMat(`${name}-snout-mat`, '#9a8f86')
+      snout.material = makeMat(`${name}-snout-mat`, "#9a8f86")
       snout.parent = root
       ;[-0.9, 0.9].forEach((x) => {
         ;[-0.4, 0.4].forEach((z) => {
           const leg = MeshBuilder.CreateCylinder(`${name}-leg-${x}-${z}`, { height: 0.9, diameter: 0.22 }, scene)
           leg.position = new Vector3(x, 0.45, z)
-          leg.material = makeMat(`${name}-leg-mat`, '#4b4a48')
+          leg.material = makeMat(`${name}-leg-mat`, "#4b4a48")
           leg.parent = root
         })
       })
@@ -242,22 +278,22 @@ export default function BabylonFarm() {
       root.position = position
       const body = MeshBuilder.CreateBox(`${name}-body`, { width: 1.8, height: 0.9, depth: 1.1 }, scene)
       body.position = new Vector3(0, 0.8, 0)
-      body.material = makeMat(`${name}-body-mat`, '#d7a2a4')
+      body.material = makeMat(`${name}-body-mat`, "#d7a2a4")
       body.parent = root
       const head = MeshBuilder.CreateBox(`${name}-head`, { width: 0.6, height: 0.5, depth: 0.6 }, scene)
       head.position = new Vector3(1.2, 0.9, 0)
-      head.material = makeMat(`${name}-head-mat`, '#d29a9c')
+      head.material = makeMat(`${name}-head-mat`, "#d29a9c")
       head.parent = root
       const snout = MeshBuilder.CreateCylinder(`${name}-snout`, { height: 0.2, diameter: 0.28 }, scene)
       snout.rotation.x = Math.PI / 2
       snout.position = new Vector3(1.6, 0.85, 0)
-      snout.material = makeMat(`${name}-snout-mat`, '#b77f82')
+      snout.material = makeMat(`${name}-snout-mat`, "#b77f82")
       snout.parent = root
       ;[-0.6, 0.6].forEach((x) => {
         ;[-0.35, 0.35].forEach((z) => {
           const leg = MeshBuilder.CreateCylinder(`${name}-leg-${x}-${z}`, { height: 0.55, diameter: 0.18 }, scene)
           leg.position = new Vector3(x, 0.28, z)
-          leg.material = makeMat(`${name}-leg-mat`, '#8a5b5d')
+          leg.material = makeMat(`${name}-leg-mat`, "#8a5b5d")
           leg.parent = root
         })
       })
@@ -269,17 +305,17 @@ export default function BabylonFarm() {
       root.position = position
       const body = MeshBuilder.CreateSphere(`${name}-body`, { diameter: 1.6 }, scene)
       body.position = new Vector3(0, 1, 0)
-      body.material = makeMat(`${name}-body-mat`, '#e6e2da')
+      body.material = makeMat(`${name}-body-mat`, "#e6e2da")
       body.parent = root
       const head = MeshBuilder.CreateBox(`${name}-head`, { width: 0.6, height: 0.5, depth: 0.5 }, scene)
       head.position = new Vector3(1.1, 1.1, 0)
-      head.material = makeMat(`${name}-head-mat`, '#6b5c55')
+      head.material = makeMat(`${name}-head-mat`, "#6b5c55")
       head.parent = root
       ;[-0.5, 0.5].forEach((x) => {
         ;[-0.35, 0.35].forEach((z) => {
           const leg = MeshBuilder.CreateCylinder(`${name}-leg-${x}-${z}`, { height: 0.6, diameter: 0.16 }, scene)
           leg.position = new Vector3(x, 0.3, z)
-          leg.material = makeMat(`${name}-leg-mat`, '#4b403c')
+          leg.material = makeMat(`${name}-leg-mat`, "#4b403c")
           leg.parent = root
         })
       })
@@ -291,22 +327,22 @@ export default function BabylonFarm() {
       root.position = position
       const body = MeshBuilder.CreateBox(`${name}-body`, { width: 2.8, height: 1.2, depth: 1 }, scene)
       body.position = new Vector3(0, 1.15, 0)
-      body.material = makeMat(`${name}-body-mat`, '#8b6a4e')
+      body.material = makeMat(`${name}-body-mat`, "#8b6a4e")
       body.parent = root
       const neck = MeshBuilder.CreateBox(`${name}-neck`, { width: 0.6, height: 1.2, depth: 0.6 }, scene)
       neck.position = new Vector3(1.4, 1.7, 0)
       neck.rotation.z = Math.PI / 10
-      neck.material = makeMat(`${name}-neck-mat`, '#7a5a40')
+      neck.material = makeMat(`${name}-neck-mat`, "#7a5a40")
       neck.parent = root
       const head = MeshBuilder.CreateBox(`${name}-head`, { width: 0.8, height: 0.6, depth: 0.5 }, scene)
       head.position = new Vector3(2.1, 1.9, 0)
-      head.material = makeMat(`${name}-head-mat`, '#6a4d37')
+      head.material = makeMat(`${name}-head-mat`, "#6a4d37")
       head.parent = root
       ;[-1.0, 1.0].forEach((x) => {
         ;[-0.35, 0.35].forEach((z) => {
           const leg = MeshBuilder.CreateCylinder(`${name}-leg-${x}-${z}`, { height: 1.1, diameter: 0.2 }, scene)
           leg.position = new Vector3(x, 0.55, z)
-          leg.material = makeMat(`${name}-leg-mat`, '#3b2b22')
+          leg.material = makeMat(`${name}-leg-mat`, "#3b2b22")
           leg.parent = root
         })
       })
@@ -318,39 +354,43 @@ export default function BabylonFarm() {
       root.position = position
       const body = MeshBuilder.CreateSphere(`${name}-body`, { diameter: 0.8 }, scene)
       body.position = new Vector3(0, 0.7, 0)
-      body.material = makeMat(`${name}-body-mat`, '#f2e6cf')
+      body.material = makeMat(`${name}-body-mat`, "#f2e6cf")
       body.parent = root
       const head = MeshBuilder.CreateSphere(`${name}-head`, { diameter: 0.4 }, scene)
       head.position = new Vector3(0.45, 0.95, 0)
-      head.material = makeMat(`${name}-head-mat`, '#f2e6cf')
+      head.material = makeMat(`${name}-head-mat`, "#f2e6cf")
       head.parent = root
-      const beak = MeshBuilder.CreateCylinder(`${name}-beak`, { height: 0.18, diameterTop: 0, diameterBottom: 0.16 }, scene)
+      const beak = MeshBuilder.CreateCylinder(
+        `${name}-beak`,
+        { height: 0.18, diameterTop: 0, diameterBottom: 0.16 },
+        scene,
+      )
       beak.rotation.z = Math.PI / 2
       beak.position = new Vector3(0.7, 0.92, 0)
-      beak.material = makeMat(`${name}-beak-mat`, '#d18a3b')
+      beak.material = makeMat(`${name}-beak-mat`, "#d18a3b")
       beak.parent = root
       return { id: name, entity, position: root.position, root, speech: createSpeechBubble(root, 1.7) }
     }
 
     animalInstances.push(
-      createCow(cowEntity, 'cow-1', new Vector3(-11, 0, -4)),
-      createCow(cowEntity, 'cow-2', new Vector3(-9, 0, 8)),
-      createPig(pigEntity, 'pig-1', new Vector3(-3, 0, -7)),
-      createSheep(sheepEntity, 'sheep-1', new Vector3(-6, 0, 11)),
-      createHorse(horseEntity, 'horse-1', new Vector3(4, 0, 9)),
-      createHorse(horseEntity, 'horse-2', new Vector3(9, 0, 1)),
-      createChicken(chickenEntity, 'chicken-1', new Vector3(2, 0, -3)),
-      createChicken(chickenEntity, 'chicken-2', new Vector3(7, 0, -6)),
-      createChicken(chickenEntity, 'chicken-3', new Vector3(-1, 0, 4))
+      createCow(cowEntity, "cow-1", new Vector3(-11, 0, -4)),
+      createCow(cowEntity, "cow-2", new Vector3(-9, 0, 8)),
+      createPig(pigEntity, "pig-1", new Vector3(-3, 0, -7)),
+      createSheep(sheepEntity, "sheep-1", new Vector3(-6, 0, 11)),
+      createHorse(horseEntity, "horse-1", new Vector3(4, 0, 9)),
+      createHorse(horseEntity, "horse-2", new Vector3(9, 0, 1)),
+      createChicken(chickenEntity, "chicken-1", new Vector3(2, 0, -3)),
+      createChicken(chickenEntity, "chicken-2", new Vector3(7, 0, -6)),
+      createChicken(chickenEntity, "chicken-3", new Vector3(-1, 0, 4)),
     )
 
     const pressed = new Set<string>()
     const store = useGameStore.getState()
 
     const handleKey = (ev: KeyboardEvent) => {
-      if (ev.type === 'keydown') pressed.add(ev.key.toLowerCase())
+      if (ev.type === "keydown") pressed.add(ev.key.toLowerCase())
       else pressed.delete(ev.key.toLowerCase())
-      if (ev.key.toLowerCase() === 'f' && ev.type === 'keydown') {
+      if (ev.key.toLowerCase() === "f" && ev.type === "keydown") {
         if (!document.fullscreenElement) {
           canvas.requestFullscreen?.()
         } else {
@@ -358,10 +398,10 @@ export default function BabylonFarm() {
         }
       }
     }
-    window.addEventListener('keydown', handleKey)
-    window.addEventListener('keyup', handleKey)
+    window.addEventListener("keydown", handleKey)
+    window.addEventListener("keyup", handleKey)
 
-    const tmp = { mode: 'explore', score: 0 }
+    const tmp = { mode: "explore", score: 0 }
 
     const pickWord = (): WordEntry | undefined => {
       if (words.length === 0) return undefined
@@ -369,8 +409,7 @@ export default function BabylonFarm() {
       return words[idx]
     }
 
-    const canSpeak = (entity: AnimalEntity) =>
-      Boolean(entity.soundUrl || words.length > 0)
+    const canSpeak = (entity: AnimalEntity) => Boolean(entity.soundUrl || words.length > 0)
 
     const triggerAnimal = (instance: AnimalInstance) => {
       const word = pickWord()
@@ -399,10 +438,10 @@ export default function BabylonFarm() {
     const update = (delta: number) => {
       const now = Date.now()
       const dir = new Vector3(0, 0, 0)
-      if (pressed.has('w')) dir.z += 1
-      if (pressed.has('s')) dir.z -= 1
-      if (pressed.has('a')) dir.x -= 1
-      if (pressed.has('d')) dir.x += 1
+      if (pressed.has("w")) dir.z += 1
+      if (pressed.has("s")) dir.z -= 1
+      if (pressed.has("a")) dir.x -= 1
+      if (pressed.has("d")) dir.x += 1
       if (!dir.equals(Vector3.Zero())) {
         dir.normalize()
         const forward = camera.getDirection(new Vector3(0, 0, 1))
@@ -438,7 +477,7 @@ export default function BabylonFarm() {
       }
 
       // Interaction check
-      if (pressed.has('e')) {
+      if (pressed.has("e")) {
         const nearest = cropPositions
           .map((crop) => ({
             crop,
@@ -447,11 +486,11 @@ export default function BabylonFarm() {
           .sort((a, b) => a.dist - b.dist)[0]
 
         if (nearest && nearest.dist < 2.2) {
-          tmp.mode = 'encounter'
+          tmp.mode = "encounter"
           store.selectWord(beer.id)
           store.recordResult({
             wordId: beer.id,
-            type: 'typing',
+            type: "typing",
             score: Math.max(10, 50 - Math.round(nearest.dist * 10)),
             accuracy: 0.92,
             completedAt: new Date().toISOString(),
@@ -459,7 +498,7 @@ export default function BabylonFarm() {
           tmp.score += 10
         }
       } else {
-        tmp.mode = 'explore'
+        tmp.mode = "explore"
       }
     }
 
@@ -488,8 +527,8 @@ export default function BabylonFarm() {
     }
 
     return () => {
-      window.removeEventListener('keydown', handleKey)
-      window.removeEventListener('keyup', handleKey)
+      window.removeEventListener("keydown", handleKey)
+      window.removeEventListener("keyup", handleKey)
       engine.stopRenderLoop()
       engine.dispose()
     }
