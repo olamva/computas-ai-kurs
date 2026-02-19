@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+/* Tailwind v4 CSS-first theme */
+@theme {
+  --font-sans: 'Space Grotesk', 'Manrope', system-ui, -apple-system, sans-serif;
+  --color-background: #05060a;
+  --color-foreground: #e9f8ff;
+  --color-primary: #9bff4f;
+  --color-primary-foreground: #0a0a0f;
+  --color-accent: #7af9f0;
+  --color-accent-foreground: #031018;
+  --color-muted: #11141c;
+  --color-muted-foreground: #9ba3af;
+  --color-border: #1e2330;
+  --color-card: #0b0d14;
+  --color-card-foreground: #e3edf7;
+  --color-destructive: #ff5f6f;
+  --color-destructive-foreground: #1a0b0f;
+  --shadow-neon: 0 0 32px #9bff4f, 0 0 64px #5cf4ff;
+  --blur-glow: 64px;
+
+  --radius-sm: 0.35rem;
+  --radius-md: 0.7rem;
+  --radius-lg: 1.1rem;
+
+  --animate-pulse-slow: pulse-slow 3s ease-in-out infinite;
+  --animate-wobble: wobble 6s ease-in-out infinite;
+
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 0.88; }
+    50% { opacity: 1; filter: drop-shadow(0 0 28px var(--color-accent)); }
+  }
+
+  @keyframes wobble {
+    0% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.02) rotate(1deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant motion-reduce (&:where(.motion-reduce, .motion-reduce *));
+
+.dark {
+  --color-background: #03040a;
+  --color-foreground: #f5f7ff;
+  --color-muted: #0c1018;
+  --color-border: #171c28;
+  --color-card: #080b12;
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground;
+    background: radial-gradient(circle at 20% 20%, #112129 0, transparent 30%),
+      radial-gradient(circle at 80% 10%, #13232c 0, transparent 32%),
+      radial-gradient(circle at 50% 80%, #091d13 0, transparent 30%),
+      #05060a;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--color-primary) 30%, transparent);
+    color: var(--color-primary-foreground);
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-card/70 backdrop-blur-xl border border-border/60 shadow-[var(--shadow-neon)] rounded-lg;
+  }
+  .cta {
+    @apply inline-flex items-center gap-2 px-5 py-3 rounded-lg font-semibold tracking-tight
+    bg-primary text-primary-foreground transition-all duration-300
+    hover:-translate-y-0.5 hover:shadow-[0_0_24px_var(--color-primary)]
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+  .pill {
+    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-border;
+  }
+  .card-brutal {
+    @apply bg-card/70 backdrop-blur-xl border border-border/60 shadow-[var(--shadow-neon)] rounded-lg p-6 border-2 border-border shadow-2xl;
+  }
+}
+
+@utility text-neon {
+  color: var(--color-primary);
+  text-shadow: 0 0 8px var(--color-primary), 0 0 22px var(--color-accent);
+}
+
+@layer components {
+  .border-glow {
+    position: relative;
+  }
+  .border-glow::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: linear-gradient(120deg, #7af9f0, #9bff4f, #ff6f9f);
+    filter: blur(18px);
+    opacity: 0.35;
+    z-index: -1;
+  }
+}
+
+@utility grid-hero {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+}
+
+@utility ribbon {
+  @apply fixed top-3 right-3 z-50 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] bg-destructive text-destructive-foreground rounded-full shadow-lg;
+}
+
+.motion-reduce * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+.seizure-safe .glass,
+.seizure-safe .card-brutal {
+  box-shadow: none !important;
+  filter: none !important;
+}
