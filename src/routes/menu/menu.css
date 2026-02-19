@@ -16,6 +16,17 @@
     linear-gradient(180deg, #7fb4ff 0%, #b8e2ff 35%, #bfecc4 70%, #6da95c 100%);
 }
 
+.menu-three {
+  position: absolute;
+  right: 7%;
+  bottom: 18%;
+  width: clamp(220px, 28vw, 360px);
+  height: clamp(200px, 24vw, 320px);
+  z-index: 4;
+  pointer-events: none;
+  filter: drop-shadow(0 20px 24px rgba(10, 20, 35, 0.25));
+}
+
 .menu-sun {
   position: absolute;
   top: 10%;
@@ -263,6 +274,16 @@
   place-items: center;
   text-align: center;
   padding: 2rem;
+  gap: 1.2rem;
+}
+
+.menu-title {
+  margin: 0;
+  font-size: clamp(2rem, 3.6vw, 3.4rem);
+  font-weight: 700;
+  color: #fff7bf;
+  text-shadow: 0 10px 20px rgba(10, 20, 35, 0.25);
+  letter-spacing: 0.02em;
 }
 
 .menu-button {
