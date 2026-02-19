@@ -3,7 +3,7 @@ import HeroCanvas from '../three/HeroCanvas'
 import { useEffect } from 'react'
 
 const features = [
-  'Grotesque neon farm rendered in ThreeJS',
+  'Grotesque dusk farm rendered in ThreeJS',
   'BabylonJS free-roam with curse encounters',
   'Full-strength profanity curriculum (no slurs)',
   'Motion reduction + seizure-safe modes',
@@ -23,7 +23,7 @@ export default function Landing() {
           Trondheim Profane Farm
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl">
-          Wander a surreal Nordic farm, harvest obscene vocabulary, and practice real usage with contextual mini-challenges. Built with ThreeJS + BabylonJS, styled in Tailwind for brutalist neon vibes.
+          Wander a surreal Nordic farm, harvest obscene vocabulary, and practice real usage with contextual mini-challenges. Built with ThreeJS + BabylonJS, styled in Tailwind for a moody brutalist vibe.
         </p>
         <div className="flex flex-wrap gap-3">
           <Link className="cta" to="/farm">Enter the farm</Link>
@@ -47,7 +47,7 @@ export default function Landing() {
       </section>
 
       <section className="h-[70vh] lg:h-[80vh] relative">
-        <div className="absolute inset-0 rounded-3xl overflow-hidden border border-border shadow-[var(--shadow-neon)]">
+        <div className="absolute inset-0 rounded-3xl overflow-hidden border border-border shadow-[var(--shadow-soft)]">
           <HeroCanvas />
           <div className="absolute left-4 bottom-4 glass px-3 py-2 text-xs uppercase tracking-wide flex gap-2 items-center">
             <span className="size-2 rounded-full bg-primary animate-ping"></span>

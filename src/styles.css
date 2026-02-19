@@ -5,9 +5,9 @@
   --font-sans: 'Space Grotesk', 'Manrope', system-ui, -apple-system, sans-serif;
   --color-background: #05060a;
   --color-foreground: #e9f8ff;
-  --color-primary: #9bff4f;
+  --color-primary: #7fa58e;
   --color-primary-foreground: #0a0a0f;
-  --color-accent: #7af9f0;
+  --color-accent: #6f94a1;
   --color-accent-foreground: #031018;
   --color-muted: #11141c;
   --color-muted-foreground: #9ba3af;
@@ -16,8 +16,8 @@
   --color-card-foreground: #e3edf7;
   --color-destructive: #ff5f6f;
   --color-destructive-foreground: #1a0b0f;
-  --shadow-neon: 0 0 32px #9bff4f, 0 0 64px #5cf4ff;
-  --blur-glow: 64px;
+  --shadow-soft: 0 12px 28px rgba(4, 8, 14, 0.55);
+  --blur-glow: 18px;
 
   --radius-sm: 0.35rem;
   --radius-md: 0.7rem;
@@ -28,7 +28,7 @@
 
   @keyframes pulse-slow {
     0%, 100% { opacity: 0.88; }
-    50% { opacity: 1; filter: drop-shadow(0 0 28px var(--color-accent)); }
+    50% { opacity: 1; }
   }
 
   @keyframes wobble {
@@ -66,7 +66,7 @@
 
 @layer components {
   .glass {
-    @apply bg-card/70 backdrop-blur-xl border border-border/60 shadow-[var(--shadow-neon)] rounded-lg;
+    @apply bg-card/70 backdrop-blur-xl border border-border/60 shadow-[var(--shadow-soft)] rounded-lg;
   }
   .cta {
     @apply inline-flex items-center gap-2 px-5 py-3 rounded-lg font-semibold tracking-tight
@@ -78,13 +78,12 @@
     @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-border;
   }
   .card-brutal {
-    @apply bg-card/70 backdrop-blur-xl border border-border/60 shadow-[var(--shadow-neon)] rounded-lg p-6 border-2 border-border shadow-2xl;
+    @apply bg-card/70 backdrop-blur-xl border border-border/60 shadow-[var(--shadow-soft)] rounded-lg p-6 border-2 border-border;
   }
 }
 
 @utility text-neon {
   color: var(--color-primary);
-  text-shadow: 0 0 8px var(--color-primary), 0 0 22px var(--color-accent);
 }
 
 @layer components {
@@ -96,9 +95,9 @@
     position: absolute;
     inset: -2px;
     border-radius: inherit;
-    background: linear-gradient(120deg, #7af9f0, #9bff4f, #ff6f9f);
-    filter: blur(18px);
-    opacity: 0.35;
+    background: linear-gradient(120deg, rgba(111, 148, 161, 0.35), rgba(127, 165, 142, 0.4));
+    filter: blur(10px);
+    opacity: 0.25;
     z-index: -1;
   }
 }
